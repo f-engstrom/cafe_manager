@@ -1,8 +1,10 @@
 import clsx from "clsx";
-import { Product } from "./Table";
 import { formatDate } from "../utils/helpers";
+import { Product } from "../models/models";
 
 export function Row({ id, name, expirationDate, addedDate }: Product) {
+  console.log("mamma", name);
+
   const today = new Date().setHours(0, 0, 0, 0);
   const expirationDay = new Date(expirationDate).setHours(0, 0, 0, 0);
   console.log(today === expirationDay, today, expirationDay);

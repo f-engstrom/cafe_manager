@@ -1,22 +1,9 @@
 import { createStore } from "solid-js/store";
 import { Row } from "./Row";
-import { For } from "solid-js";
-
-export interface Product {
-  id: number;
-  name: string;
-  addedDate: number;
-  expirationDate: number;
-}
-interface FormFields {
-  id: number;
-  addedDate: string;
-  expirationDate: string;
-}
-// date now plus x days  to localstring
-// const date = new Date();
-// date.setDate(date.getDate() + 7);
-// console.log(date.toLocaleString());
+import { For, createResource } from "solid-js";
+import { setFutureDate } from "../utils/helpers";
+import { Product } from "../models/models";
+import { createClient } from "@supabase/supabase-js";
 
 const createRow = (productName: number) => {
   const date = new Date();
@@ -37,13 +24,6 @@ const createRow = (productName: number) => {
         expirationDate: date.setDate(date.getDate() + 10),
       };
   }
-};
-const setFutureDate = (date: string, days: number) => {
-  if (date === "") return "2018-07-19";
-  console.log(new Date(Date.parse(date)).toISOString().split("T")[0]);
-  const dateObj = new Date(Date.parse(date));
-  dateObj.setDate(dateObj.getDate() + days);
-  return dateObj.toISOString().split("T")[0];
 };
 
 export function Table() {
@@ -67,35 +47,27 @@ export function Table() {
     });
   };
 
-  const date1 = new Date();
-  const date2 = new Date();
-  const date3 = new Date();
-  const date4 = new Date();
-  const date5 = new Date();
-  const addedDate1 = date1.setDate(date1.getDate() - 14);
-  const addedDate2 = date1.setDate(date2.getDate() - 7);
-  const addedDate3 = date1.setDate(date3.getDate() - 7);
-  const addedDate4 = date1.setDate(date4.getDate() + 2);
-  const [rows, setRows] = createStore<Product[]>([
-    {
-      id: 1,
-      name: "Chokladboll",
-      addedDate: addedDate1,
-      expirationDate: addedDate2,
-    },
-    {
-      id: 2,
-      name: "Kaka",
-      addedDate: addedDate3,
-      expirationDate: addedDate4,
-    },
-    {
-      id: 3,
-      name: "Kaka",
-      addedDate: date5.setDate(date5.getDate() - 5),
-      expirationDate: Date.now(),
-    },
-  ]);
+  // const [rows, setRows] = createStore<Product[]>([]);
+
+  const supabaseUrl = "https://jwajghgfcoyqgvanwhwl.supabase.co";
+  // const supabaseKey = process.env.SUPABASE_KEY;
+  const supabase = createClient(
+    supabaseUrl,
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3YWpnaGdmY295cWd2YW53aHdsIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODM5NjE4NTAsImV4cCI6MTk5OTUzNzg1MH0.7eIle3K4ik5nYm3ZbBGwKJ2XakRWdPpBZdaT4Ia39RU"
+  );
+
+  const getProducts = async (): Promise<Product[]> => {
+    const { data, error } = await supabase.from("Product expiration")
+      .select(`*, Products (
+      product_name
+    )`);
+    if (error) console.log("error", error);
+    return data;
+  };
+  const [data, { mutate, refetch }] = createResource<Product[]>(getProducts);
+  // add useEffect and add products to set rows store
+  // useEffect(() => {
+  console.log("data", data());
 
   return (
     <>
@@ -149,15 +121,18 @@ export function Table() {
             <th>Uttagen</th>
             <th>Utgångsdatum</th>
           </tr>
-          <For each={rows}>
-            {(row) => (
-              <Row
-                id={row.id}
-                expirationDate={row.expirationDate}
-                addedDate={row.addedDate}
-                name={row.name}
-              />
-            )}
+          <For each={data()}>
+            {(row) => {
+              console.log("row", row);
+              return (
+                <Row
+                  id={row.id}
+                  expirationDate={row.exp_date}
+                  addedDate={row.start_date}
+                  name={row.Products.product_name}
+                />
+              );
+            }}
           </For>
         </tbody>
       </table>
