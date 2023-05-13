@@ -4,9 +4,9 @@ import "./index.css";
 
 const App: Component = () => {
   return (
-    <div>
+    <main class="text-center mx-auto text-gray-700 p-4 flex flex-col">
       <Table />
-    </div>
+    </main>
   );
 };
 

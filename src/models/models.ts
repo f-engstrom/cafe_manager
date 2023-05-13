@@ -3,6 +3,7 @@ export interface Product {
   name: string;
   addedDate: number;
   expirationDate: number;
+  note: string;
 }
 export interface FormFields {
   id: number;
