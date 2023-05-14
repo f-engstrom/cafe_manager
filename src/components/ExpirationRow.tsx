@@ -6,13 +6,21 @@ interface Props {
   expirationDate: string;
   addedDate: string;
   note: string;
+  onClick: () => void;
 }
 
-function ExpirationRow({ id, name, expirationDate, addedDate, note }: Props) {
+function ExpirationRow({
+  id,
+  name,
+  expirationDate,
+  addedDate,
+  note,
+  onClick,
+}: Props) {
   const today = new Date().setHours(0, 0, 0, 0);
   const expirationDay = new Date(expirationDate).setHours(0, 0, 0, 0);
   return (
-    <tr class="hover:bg-purple-200">
+    <tr class="hover:bg-purple-200" onClick={onClick}>
       <td class="flex justify-center">
         <div
           class={clsx(

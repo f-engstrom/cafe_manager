@@ -1,40 +1,33 @@
-import clsx from "clsx";
+import { JSX, createSignal } from "solid-js";
+import Button from "./Button";
 
 interface Props {
-  id: number;
-  name: string;
-  expirationDate: string;
-  addedDate: string;
-  note: string;
+  children: JSX.Element;
+  inputs?: JSX.Element;
+  onUpdate: () => void;
   onDelete: () => void;
 }
 
-export function Row({
-  id,
-  name,
-  expirationDate,
-  addedDate,
-  note,
-  onDelete,
-}: Props) {
-  const today = new Date().setHours(0, 0, 0, 0);
-  const expirationDay = new Date(expirationDate).setHours(0, 0, 0, 0);
+function Row({ children, onUpdate, onDelete }: Props) {
+  const [showButtons, setShowButtons] = createSignal(false);
+
   return (
     <tr
-      class={clsx(
-        "odd:bg-white even:bg-slate-50",
-        expirationDay < today && "!bg-red-500",
-        expirationDay === today && "!bg-orange-500"
-      )}
+      class="hover:bg-stone-100"
+      onClick={() => setShowButtons(!showButtons())}
     >
-      <td>{id}</td>
-      <td>{name}</td>
-      <td>{addedDate}</td>
-      <td>{expirationDate}</td>
-      <td>{note}</td>
-      <td>
-        <button onClick={onDelete}>ta bort</button>
-      </td>
+      {children}
+      {showButtons() && (
+        <div>
+          <Button variant="primary" onClick={onUpdate} class="mr-2">
+            Uppdatera
+          </Button>
+          <Button variant="danger" onClick={onDelete}>
+            Ta bort
+          </Button>
+        </div>
+      )}
     </tr>
   );
 }
+export default Row;

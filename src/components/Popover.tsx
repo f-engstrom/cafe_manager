@@ -9,7 +9,7 @@ interface Props {
 }
 
 function Popover(props: Props) {
-  const { children, heading, onClose } = props;
+  const { heading, onClose } = props;
   console.log(open, open);
 
   return (
@@ -53,7 +53,7 @@ function Popover(props: Props) {
             </span>
           </button>
         </div>
-        {children}
+        {props.children}
       </div>
     </div>
   );
