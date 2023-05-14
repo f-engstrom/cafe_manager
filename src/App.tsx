@@ -16,19 +16,24 @@ export const supabase = createClient<Database>(
 const App: Component = () => {
   return (
     <Router>
-      <header>
+      <header class=" bg-gradient-to-r from-purple-400 to-purple-600  shadow-2xl p-4">
+        <h1 class="text-center text-2xl font-bold mb-4">Cafe Manager</h1>
         <nav>
-          <ul>
+          <ul class="flex gap-2 justify-center">
             <li>
-              <A href="/">Home</A>
+              <A class="underline" href="/">
+                Home
+              </A>
             </li>
             <li>
-              <A href="/admin">Admin</A>
+              <A class="underline" href="/admin">
+                Admin
+              </A>
             </li>
           </ul>
         </nav>
       </header>
-      <main class="text-center mx-auto text-gray-700 p-4 flex flex-col">
+      <main class="text-center mx-auto text-gray-700 p-6 flex flex-col">
         <Routes>
           <Route path="/" component={Table} />
           <Route path="/admin" component={ProductAdmin} />
