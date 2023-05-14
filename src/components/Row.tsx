@@ -1,8 +1,22 @@
 import clsx from "clsx";
-import { formatDate } from "../utils/helpers";
-import { Product } from "../models/models";
 
-export function Row({ id, name, expirationDate, addedDate, note }: Product) {
+interface Props {
+  id: number;
+  name: string;
+  expirationDate: string;
+  addedDate: string;
+  note: string;
+  onDelete: () => void;
+}
+
+export function Row({
+  id,
+  name,
+  expirationDate,
+  addedDate,
+  note,
+  onDelete,
+}: Props) {
   const today = new Date().setHours(0, 0, 0, 0);
   const expirationDay = new Date(expirationDate).setHours(0, 0, 0, 0);
   return (
@@ -15,9 +29,12 @@ export function Row({ id, name, expirationDate, addedDate, note }: Product) {
     >
       <td>{id}</td>
       <td>{name}</td>
-      <td>{formatDate(addedDate)}</td>
-      <td>{formatDate(expirationDate)}</td>
+      <td>{addedDate}</td>
+      <td>{expirationDate}</td>
       <td>{note}</td>
+      <td>
+        <button onClick={onDelete}>ta bort</button>
+      </td>
     </tr>
   );
 }
