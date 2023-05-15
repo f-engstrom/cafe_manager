@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { Database } from "../models/supabase";
-import { NewProduct } from "../models/models";
+import { NewProduct, UpdatedProduct } from "../models/models";
 
 const supabaseUrl = "https://jwajghgfcoyqgvanwhwl.supabase.co";
 // const supabaseKey = process.env.SUPABASE_KEY;
@@ -17,18 +17,19 @@ export const getFromExpiraton = async () => {
   return data;
 };
 export const deleteFromExpiraton = async (id: number) => {
-  const { data, error } = await supabase
-    .from("product_expiration")
-    .delete()
-    .eq("id", id);
-  if (error) console.log("error", error);
+  return supabase.from("product_expiration").delete().eq("id", id);
 };
-export const updateExpiration = async (id: number, exp_date: string) => {
-  const { data, error } = await supabase
+export const updateExpiration = async ({
+  product,
+  exp_date,
+  start_date,
+  note,
+  id,
+}: UpdatedProduct) => {
+  return supabase
     .from("product_expiration")
-    .update({ exp_date })
+    .update({ id, product, exp_date, start_date, note })
     .eq("id", id);
-  if (error) console.log("error", error);
 };
 export const addToExpiration = async ({
   product,
@@ -36,26 +37,29 @@ export const addToExpiration = async ({
   start_date,
   note,
 }: NewProduct) => {
-  console.log(product);
-  const { data, error } = await supabase
+  console.log("hallåman", product);
+  return supabase
     .from("product_expiration")
     .insert({ product, exp_date, start_date, note });
-  if (error) console.log("error", error);
 };
-const addProduct = async (e: any) => {
-  e.preventDefault();
-  const { data, error } = await supabase.from("products").insert({
-    product_name: e.target.product_name.value,
-    expiration_days: e.target.expiration_days.value,
+export const addProduct = async ({ product_name, expiration_days }) => {
+  return supabase.from("products").insert({
+    product_name,
+    expiration_days,
   });
-  if (error) console.log("error", error);
 };
+export const updateProduct = async ({ product_name, expiration_days, id }) => {
+  return supabase
+    .from("products")
+    .update({ product_name, expiration_days })
+    .eq("id", id);
+};
+
 export const getProducts = async () => {
   const { data, error } = await supabase.from("products").select("*");
   if (error) console.log("error", error);
   return data;
 };
-const deleteFromProducts = async (id: number) => {
-  const { data, error } = await supabase.from("products").delete().eq("id", id);
-  if (error) console.log("error", error);
+export const deleteProduct = async (id: number) => {
+  return supabase.from("products").delete().eq("id", id);
 };
