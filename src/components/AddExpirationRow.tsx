@@ -1,14 +1,18 @@
 //add row component
 
-import { For } from "solid-js";
+import { For, createSignal } from "solid-js";
 import { setFutureDate } from "../utils/helpers";
 import { createStore } from "solid-js/store";
-import { supabase } from "../App";
-import { FormFields, NewProduct } from "../models/models";
+import { FormFields } from "../models/models";
 import Button from "./Button";
+import {
+  addToExpiration,
+  deleteFromExpiraton,
+  updateExpiration,
+} from "../lib/supabase";
 
 interface Props {
-  onAdd: () => void;
+  onAddOrUpdate: () => void;
   products:
     | {
         created_at: string | null;
@@ -16,15 +20,34 @@ interface Props {
         id: number;
         product_name: string | null;
       }[]
+    | null
     | undefined;
+  product: {
+    created_at: string | null;
+    exp_date: string | null;
+    id: number;
+    note: string | null;
+    product: number | null;
+    start_date: string | null;
+    products:
+      | {
+          product_name: string | null;
+        }
+      | {
+          product_name: string | null;
+        }[]
+      | null;
+  };
 }
-function AddExpirationRow(props: Props) {
-  const { onAdd } = props;
+function AddUpdateDeleteExpirationRow(props: Props) {
+  const { onAddOrUpdate } = props;
   const [form, setForm] = createStore<FormFields>({
     id: 0,
     addedDate: "",
     expirationDate: "",
   });
+  const [loading, setLoading] = createSignal<boolean>(false);
+  const [selectedProduct, setSelectedProduct] = createSignal();
   const updateFormField = (fieldName: string) => (event: Event) => {
     const inputElement = event.currentTarget as HTMLInputElement;
     console.log(fieldName, inputElement.value);
@@ -39,38 +62,32 @@ function AddExpirationRow(props: Props) {
       [fieldName]: inputElement.value,
     });
   };
-  // const getProducts = async () => {
-  //   const { data, error } = await supabase.from("products").select("*");
-  //   if (error) console.log("error", error);
-  //   return data;
-  // };
-  // const [products, { mutate: mutateProducts, refetch: refetchProducts }] =
-  //   createResource(getProducts);
 
-  const addProduct = async ({
-    product,
-    exp_date,
-    start_date,
-    note,
-  }: NewProduct) => {
-    console.log(product);
-    const { data, error } = await supabase
-      .from("product_expiration")
-      .insert({ product, exp_date, start_date, note });
-    if (error) console.log("error", error);
-    onAdd();
-  };
   return (
     <form
       class="flex flex-col h-full gap-4 mt-4"
-      onSubmit={(event: Event) => {
+      onSubmit={async (event: Event) => {
         event.preventDefault();
-        addProduct({
-          product: event.target.product.value,
-          exp_date: event.target.expirationDate.value,
-          start_date: event.target.addedDate.value,
-          note: event.target.note.value,
-        });
+        setLoading(true);
+        if (!props.product) {
+          const res = await addToExpiration({
+            product: event.target.product.value,
+            exp_date: event.target.expirationDate.value,
+            start_date: event.target.addedDate.value,
+            note: event.target.note.value,
+          });
+          console.log("mjau bror", res);
+        } else {
+          await updateExpiration({
+            id: props.product.id,
+            product: event.target.product.value,
+            exp_date: event.target.expirationDate.value,
+            start_date: event.target.addedDate.value,
+            note: event.target.note.value,
+          });
+        }
+        setLoading(false);
+        onAddOrUpdate();
       }}
     >
       <div class="flex flex-col items-start">
@@ -84,7 +101,14 @@ function AddExpirationRow(props: Props) {
           name="product"
           id="product"
           class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-          onChange={updateFormField("id")}
+          onChange={(e) => {
+            setSelectedProduct(
+              props.products.find(
+                (product) => product.id === parseInt(e.currentTarget.value)
+              )
+            );
+          }}
+          value={props.product?.product}
         >
           <option value="0">Välj produkt</option>
           <For each={props.products}>
@@ -105,6 +129,7 @@ function AddExpirationRow(props: Props) {
             name="addedDate"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             onChange={updateFormField("addedDate")}
+            value={props.product?.start_date}
           />
         </div>
         <div class="flex flex-col items-start">
@@ -116,7 +141,10 @@ function AddExpirationRow(props: Props) {
             id="end"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             name="expirationDate"
-            value={setFutureDate(form.addedDate, 7)}
+            value={setFutureDate(
+              form.addedDate,
+              selectedProduct()?.expiration_days
+            )}
             onChange={updateFormField("expirationDate")}
           />
         </div>
@@ -133,16 +161,33 @@ function AddExpirationRow(props: Props) {
           name="note"
           rows="4"
           class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-          placeholder="Write your thoughts here..."
+          value={props.product?.note ? props.product.note : ""}
         ></textarea>
       </div>
       <div class="mt-auto mb-8">
-        <Button variant="primary" type="submit">
-          Lägg till produkt
-        </Button>
+        <div class="flex gap-x-2">
+          <Button variant="primary" type="submit" loading={loading()}>
+            {props.product ? "Uppdatera produkt" : "Lägg till produkt"}
+          </Button>
+          {props.product && (
+            <Button
+              variant="danger"
+              type="button"
+              loading={loading()}
+              onClick={async () => {
+                setLoading(true);
+                await deleteFromExpiraton(props.product.id);
+                setLoading(false);
+                onAddOrUpdate();
+              }}
+            >
+              ta bort produkt
+            </Button>
+          )}
+        </div>
       </div>
     </form>
   );
 }
 
-export default AddExpirationRow;
+export default AddUpdateDeleteExpirationRow;
