@@ -14,8 +14,6 @@ function ProductExpirationView() {
   const [addRowPopoverOpen, setAddRowPopoverOpeOpen] = createSignal(false);
   const [product, setProduct] = createSignal<any>(null);
   const setProductAndOpen = (row: any) => {
-    console.log(row);
-
     setProduct(row);
     setAddRowPopoverOpeOpen(true);
   };
@@ -31,7 +29,11 @@ function ProductExpirationView() {
         }}
       >
         <AddUpdateDeleteExpirationRow
-          onAdd={refetchFromExpiration}
+          onAddOrUpdate={() => {
+            refetchFromExpiration();
+            setAddRowPopoverOpeOpen(false);
+            setProduct(null);
+          }}
           products={products()}
           product={product()}
         />
