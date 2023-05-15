@@ -1,9 +1,9 @@
 import { For, createResource, createSignal } from "solid-js";
 import ProductRow from "./ProductRow";
 import Popover from "./Popover";
-import Button from "./Button";
 import { getProducts } from "../lib/supabase";
 import Table from "./Table";
+import AddProduct from "./AddProduct";
 
 function ProductAdminView() {
   const [products, { mutate: mutateProducts, refetch: refetchProducts }] =
@@ -26,7 +26,16 @@ function ProductAdminView() {
           setAddRowPopoverOpeOpen(false);
           setProduct(null);
         }}
-      ></Popover>
+      >
+        <AddProduct
+          onAddOrUpdate={() => {
+            refetchProducts();
+            setAddRowPopoverOpeOpen(false);
+            setProduct(null);
+          }}
+          product={product()}
+        />
+      </Popover>
       <Table
         heading="Produkter"
         buttonText="Lägg till ny produkt"
