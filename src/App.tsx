@@ -1,35 +1,29 @@
-import { Component } from "solid-js";
+import { Component, createEffect, createSignal } from "solid-js";
 import "./index.css";
 import { Router, Route, Routes, A } from "@solidjs/router";
 import ProductAdminView from "./components/ProductAdminView";
 import ProductExpirationView from "./components/ProductExpirationView";
+import { supabase } from "./lib/supabase";
+import RouteGuard from "./components/RouteGuard";
+import SignInView from "./components/SignInView";
 
+export const [session, setSession] = createSignal<any>(null);
 const App: Component = () => {
+  createEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+  });
+
   return (
     <Router>
-      <header class=" bg-gradient-to-r from-purple-400 to-purple-600  shadow-2xl p-4">
-        <h1 class="text-center text-2xl font-bold mb-4">Cafe Manager</h1>
-        <nav>
-          <ul class="flex gap-2 justify-center">
-            <li>
-              <A class="underline" href="/">
-                Home
-              </A>
-            </li>
-            <li>
-              <A class="underline" href="/admin">
-                Admin
-              </A>
-            </li>
-          </ul>
-        </nav>
-      </header>
-      <main class="text-center mx-auto text-gray-700 p-6 flex flex-col">
-        <Routes>
+      <Routes>
+        <Route path="signin" component={SignInView} />
+        <Route path="/" component={RouteGuard}>
           <Route path="/" component={ProductExpirationView} />
           <Route path="/admin" component={ProductAdminView} />
-        </Routes>
-      </main>
+        </Route>
+      </Routes>
     </Router>
   );
 };
