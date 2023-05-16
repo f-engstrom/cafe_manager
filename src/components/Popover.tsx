@@ -10,7 +10,6 @@ interface Props {
 
 function Popover(props: Props) {
   const { heading, onClose } = props;
-  console.log(open, open);
 
   return (
     <div class={clsx(!props.open && "hidden")}>
