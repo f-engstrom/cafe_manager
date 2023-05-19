@@ -1,10 +1,5 @@
-export interface Product {
-  id: number;
-  name: string;
-  addedDate: number;
-  expirationDate: number;
-  note: string;
-}
+import { Database } from "./supabase";
+
 export interface NewProduct {
   product: number;
   exp_date: string;
@@ -23,3 +18,7 @@ export interface FormFields {
   addedDate: string;
   expirationDate: string;
 }
+
+type ProductExpirationRow =
+  Database["public"]["Tables"]["product_expiration"]["Row"];
+export interface ProductRow extends ProductExpirationRow {}

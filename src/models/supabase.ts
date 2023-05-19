@@ -1,4 +1,6 @@
-export type Json =
+Need to install the following packages:
+  supabase
+Ok to proceed? (y) export type Json =
   | string
   | number
   | boolean
@@ -17,6 +19,7 @@ export interface Database {
           note: string | null
           product: number | null
           start_date: string | null
+          user_id: string | null
         }
         Insert: {
           created_at?: string | null
@@ -25,6 +28,7 @@ export interface Database {
           note?: string | null
           product?: number | null
           start_date?: string | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string | null
@@ -33,6 +37,7 @@ export interface Database {
           note?: string | null
           product?: number | null
           start_date?: string | null
+          user_id?: string | null
         }
       }
       products: {
@@ -41,18 +46,21 @@ export interface Database {
           expiration_days: number | null
           id: number
           product_name: string | null
+          user_id: string
         }
         Insert: {
           created_at?: string | null
           expiration_days?: number | null
           id?: number
           product_name?: string | null
+          user_id?: string
         }
         Update: {
           created_at?: string | null
           expiration_days?: number | null
           id?: number
           product_name?: string | null
+          user_id?: string
         }
       }
     }
