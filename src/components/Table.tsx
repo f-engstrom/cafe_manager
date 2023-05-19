@@ -1,9 +1,6 @@
-import ExpirationRow from "./ExpirationRow";
-import { For, JSXElement, createResource, createSignal, on } from "solid-js";
-import AddUpdateDeleteExpirationRow from "./AddExpirationRow";
-import Popover from "./Popover";
+import { For, JSXElement, Show } from "solid-js";
 import Button from "./Button";
-import { getFromExpiraton, getProducts } from "../lib/supabase";
+import LoadingSpinner from "./LoadingSpinner";
 
 interface Props {
   onClick: () => void;
@@ -11,30 +8,40 @@ interface Props {
   buttonText: string;
   tableHeadings: string[];
   rows: JSXElement;
+  loading?: boolean;
 }
 
 export default function Table(props: Props) {
   const { onClick, heading, buttonText, tableHeadings } = props;
   return (
-    <>
-      <div class="flex justify-between mb-6">
+    <div class="mt-8 flex flex-col mx-10 bg-white max-h-screen">
+      <div class="flex justify-between mb-6  bg-white">
         <h2 class=" text-2xl bold">{heading}</h2>
-        <Button variant="primary" onClick={onClick}>
+        <Button variant="primary" displayWidth="auto" onClick={onClick}>
           {buttonText}
         </Button>
       </div>
-      <table class="table-auto">
-        <tbody>
-          <tr>
-            <For each={tableHeadings}>
-              {(heading) => {
-                return <th>{heading}</th>;
-              }}
-            </For>
-          </tr>
-          {props.rows}
-        </tbody>
-      </table>
-    </>
+      <Show
+        when={!props.loading}
+        fallback={<LoadingSpinner className="mt-8" />}
+      >
+        <table class="table-auto ">
+          <thead>
+            <tr class="sticky z-10 top-15 bg-white">
+              <For each={tableHeadings}>
+                {(heading) => {
+                  return (
+                    <th class="py-3.5 pl-4 pr-3  text-sm font-semibold text-gray-900 sm:pl-3">
+                      {heading}
+                    </th>
+                  );
+                }}
+              </For>
+            </tr>
+          </thead>
+          <tbody class="overflow-auto">{props.rows}</tbody>
+        </table>
+      </Show>
+    </div>
   );
 }
