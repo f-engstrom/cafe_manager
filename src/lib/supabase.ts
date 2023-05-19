@@ -16,7 +16,7 @@ export const getFromExpiraton = async () => {
   if (error) console.log("error", error);
   return data;
 };
-export const deleteFromExpiraton = async (id: number) => {
+export const requestDeleteFromExpiraton = async (id: number) => {
   return supabase.from("product_expiration").delete().eq("id", id);
 };
 export const updateExpiration = async ({
@@ -60,6 +60,6 @@ export const getProducts = async () => {
   if (error) console.log("error", error);
   return data;
 };
-export const deleteProduct = async (id: number) => {
+export const requestDeleteProduct = async (id: number) => {
   return supabase.from("products").delete().eq("id", id);
 };
