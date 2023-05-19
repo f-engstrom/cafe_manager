@@ -33,11 +33,13 @@ function AddProduct(props: Props) {
     error: "",
     success: "",
     done: false,
-    loading: false,
+    loadingAdd: false,
+    loadingDelete: false,
   });
   const deleteProduct = async () => {
-    setStatus({ loading: true });
+    setStatus({ loadingDelete: true });
     const res = await requestDeleteProduct(props.product?.id || 0);
+    setStatus({ loadingDelete: false });
     console.log(res);
     if (res.error) {
       if (res.error.code === "23503") {
@@ -45,14 +47,12 @@ function AddProduct(props: Props) {
           error: "Produkten används i en eller flera expirationer",
           success: "",
           done: true,
-          loading: false,
         });
       } else {
         setStatus({
           error: "Något gick fel",
           success: "",
           done: true,
-          loading: false,
         });
       }
     } else {
@@ -60,7 +60,6 @@ function AddProduct(props: Props) {
         error: "",
         success: "Produkt borttagen",
         done: true,
-        loading: false,
       });
       await timeOut(2000);
       addOrUpdate();
@@ -89,14 +88,14 @@ function AddProduct(props: Props) {
         class="flex flex-col h-full gap-4 mt-4"
         onSubmit={async (event: Event) => {
           event.preventDefault();
-          setStatus({ loading: true });
+          setStatus({ loadingAdd: true });
           let res;
           if (!props.product) {
             res = await addProduct({
               product_name: event.target.productName.value,
               expiration_days: event.target.expirationDays.value,
             });
-            setStatus({ loading: false });
+            setStatus({ loadingAdd: false });
             if (res.error) {
               setStatus({ error: "Något gick fel", success: "", done: true });
             } else {
@@ -110,7 +109,7 @@ function AddProduct(props: Props) {
               product_name: event.target.productName.value,
               expiration_days: event.target.expirationDays.value,
             });
-            setStatus({ loading: false });
+            setStatus({ loadingAdd: false });
             if (res.error) {
               setStatus({ error: "Något gick fel", success: "", done: true });
             }
@@ -143,14 +142,14 @@ function AddProduct(props: Props) {
 
         <div class="mt-auto mb-8">
           <div class="flex gap-x-2">
-            <Button variant="primary" type="submit" loading={status.loading}>
+            <Button variant="primary" type="submit" loading={status.loadingAdd}>
               {props.product ? "Uppdatera produkt" : "Lägg till produkt"}
             </Button>
             {props.product && (
               <Button
                 variant="danger"
                 type="button"
-                loading={status.loading}
+                loading={status.loadingDelete}
                 onClick={deleteProduct}
               >
                 ta bort produkt

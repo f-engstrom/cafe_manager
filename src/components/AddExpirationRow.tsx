@@ -56,7 +56,8 @@ function AddUpdateDeleteExpirationRow(props: Props) {
     error: "",
     success: "",
     done: false,
-    loading: false,
+    loadingAdd: false,
+    loadingDelete: false,
   });
   const updateFormField = (fieldName: string) => (event: Event) => {
     const inputElement = event.currentTarget as HTMLInputElement;
@@ -75,9 +76,9 @@ function AddUpdateDeleteExpirationRow(props: Props) {
     console.log("unmount");
   });
   const deleteFromExpiration = async () => {
-    setStatus({ loading: true });
+    setStatus({ loadingDelete: true });
     const res = await requestDeleteFromExpiraton(props.product.id);
-    setStatus({ loading: false });
+    setStatus({ loadingDelete: false });
     if (res.error) {
       setStatus({
         error: res.error.message,
@@ -117,7 +118,7 @@ function AddUpdateDeleteExpirationRow(props: Props) {
         class="flex flex-col h-full gap-4 mt-4"
         onSubmit={async (event: Event) => {
           event.preventDefault();
-          setStatus({ loading: true });
+          setStatus({ loadingAdd: true });
           let res;
           if (!props.product) {
             res = await addToExpiration({
@@ -126,7 +127,7 @@ function AddUpdateDeleteExpirationRow(props: Props) {
               start_date: event.target.addedDate.value,
               note: event.target.note.value,
             });
-            setStatus({ loading: false });
+            setStatus({ loadingAdd: false });
             if (res.error) {
               setStatus({
                 error: "Något gick fel",
@@ -138,7 +139,6 @@ function AddUpdateDeleteExpirationRow(props: Props) {
                 error: "",
                 success: "Produkt tillagd",
                 done: true,
-                loading: false,
               });
               await timeOut(2000);
               addOrUpdate();
@@ -151,7 +151,7 @@ function AddUpdateDeleteExpirationRow(props: Props) {
               start_date: event.target.addedDate.value,
               note: event.target.note.value,
             });
-            setStatus({ loading: false });
+            setStatus({ loadingAdd: false });
             if (res.error) {
               setStatus({
                 error: "Något gick fel",
@@ -249,14 +249,14 @@ function AddUpdateDeleteExpirationRow(props: Props) {
         </div>
         <div class="mt-auto mb-8 ">
           <div class="flex gap-x-2 justify-center">
-            <Button variant="primary" type="submit" loading={status.loading}>
+            <Button variant="primary" type="submit" loading={status.loadingAdd}>
               {props.product ? "Uppdatera produkt" : "Lägg till produkt"}
             </Button>
             {props.product && (
               <Button
                 variant="danger"
                 type="button"
-                loading={status.loading}
+                loading={status.loadingDelete}
                 onClick={deleteFromExpiration}
               >
                 ta bort produkt
