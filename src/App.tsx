@@ -1,30 +1,35 @@
-import { Component, createEffect, createSignal } from "solid-js";
+import { Component, Show } from "solid-js";
 import "./index.css";
 import { Router, Route, Routes, A } from "@solidjs/router";
 import ProductAdminView from "./components/ProductAdminView";
 import ProductExpirationView from "./components/ProductExpirationView";
-import { supabase } from "./lib/supabase";
 import RouteGuard from "./components/RouteGuard";
 import SignInView from "./components/SignInView";
+import { useAuth } from "./components/AuthContext";
+import LoadingSpinner from "./components/LoadingSpinner";
 
-export const [session, setSession] = createSignal<any>(null);
 const App: Component = () => {
-  createEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
-  });
+  const [session] = useAuth();
 
   return (
-    <Router>
-      <Routes>
-        <Route path="signin" component={SignInView} />
-        <Route path="/" component={RouteGuard}>
-          <Route path="/" component={ProductExpirationView} />
-          <Route path="/admin" component={ProductAdminView} />
-        </Route>
-      </Routes>
-    </Router>
+    <Show
+      when={session() || session() === null}
+      fallback={
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
+          <LoadingSpinner />
+        </div>
+      }
+    >
+      <Router>
+        <Routes>
+          <Route path="signin" component={SignInView} />
+          <Route path="/" component={RouteGuard}>
+            <Route path="/" component={ProductExpirationView} />
+            <Route path="/admin" component={ProductAdminView} />
+          </Route>
+        </Routes>
+      </Router>
+    </Show>
   );
 };
 
