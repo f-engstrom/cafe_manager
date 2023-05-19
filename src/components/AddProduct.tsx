@@ -1,6 +1,13 @@
 import { createSignal } from "solid-js";
-import { addProduct, updateProduct, deleteProduct } from "../lib/supabase";
+import {
+  addProduct,
+  updateProduct,
+  requestDeleteProduct,
+} from "../lib/supabase";
 import Button from "./Button";
+import Alert from "./Alert";
+import { timeOut } from "../utils/helpers";
+import { createStore } from "solid-js/store";
 
 interface Props {
   onAddOrUpdate: () => void;
@@ -17,76 +24,142 @@ interface Props {
 
 function AddProduct(props: Props) {
   const { onAddOrUpdate } = props;
+  const addOrUpdate = () => {
+    onAddOrUpdate();
+    setStatus({ error: "", success: "", done: false });
+  };
 
-  const [loading, setLoading] = createSignal<boolean>(false);
+  const [status, setStatus] = createStore({
+    error: "",
+    success: "",
+    done: false,
+    loading: false,
+  });
+  const deleteProduct = async () => {
+    setStatus({ loading: true });
+    const res = await requestDeleteProduct(props.product?.id || 0);
+    console.log(res);
+    if (res.error) {
+      if (res.error.code === "23503") {
+        setStatus({
+          error: "Produkten används i en eller flera expirationer",
+          success: "",
+          done: true,
+          loading: false,
+        });
+      } else {
+        setStatus({
+          error: "Något gick fel",
+          success: "",
+          done: true,
+          loading: false,
+        });
+      }
+    } else {
+      setStatus({
+        error: "",
+        success: "Produkt borttagen",
+        done: true,
+        loading: false,
+      });
+      await timeOut(2000);
+      addOrUpdate();
+    }
+  };
 
   return (
-    <form
-      class="flex flex-col h-full gap-4 mt-4"
-      onSubmit={async (event: Event) => {
-        event.preventDefault();
-        setLoading(true);
-        if (!props.product) {
-          const res = await addProduct({
-            product_name: event.target.productName.value,
-            expiration_days: event.target.expirationDays.value,
-          });
-          console.log("mjau bror", res);
-        } else {
-          await updateProduct({
-            id: props.product.id,
-            product_name: event.target.productName.value,
-            expiration_days: event.target.expirationDays.value,
-          });
-        }
-        setLoading(false);
-        onAddOrUpdate();
-      }}
-    >
-      <div class="flex flex-col items-start">
-        <label class="text-sm">Produkt</label>
-        <input
-          class="border border-gray-300 rounded-md p-2"
-          type="text"
-          name="productName"
-          value={props.product?.product_name || ""}
-          required
+    <>
+      {status.done && !status.error && (
+        <Alert
+          message={status.success}
+          type="success"
+          heading="Allt gick bra!"
+          className="mt-4"
         />
-      </div>
-      <div class="flex flex-col items-start">
-        <label class="text-sm">Hållbarhet</label>
-        <input
-          class="border border-gray-300 rounded-md p-2"
-          type="number"
-          name="expirationDays"
-          value={props.product?.expiration_days}
-          required
+      )}
+      {status.done && status.error && (
+        <Alert
+          message={status.error}
+          type="error"
+          heading="Något gick fel!"
+          className="mt-4"
         />
-      </div>
-
-      <div class="mt-auto mb-8">
-        <div class="flex gap-x-2">
-          <Button variant="primary" type="submit" loading={loading()}>
-            {props.product ? "Uppdatera produkt" : "Lägg till produkt"}
-          </Button>
-          {props.product && (
-            <Button
-              variant="danger"
-              type="button"
-              loading={loading()}
-              onClick={async () => {
-                setLoading(true);
-                await deleteProduct(props.product.id);
-                setLoading(false);
-                onAddOrUpdate();
-              }}
-            >
-              ta bort produkt
-            </Button>
-          )}
+      )}
+      <form
+        class="flex flex-col h-full gap-4 mt-4"
+        onSubmit={async (event: Event) => {
+          event.preventDefault();
+          setStatus({ loading: true });
+          let res;
+          if (!props.product) {
+            res = await addProduct({
+              product_name: event.target.productName.value,
+              expiration_days: event.target.expirationDays.value,
+            });
+            setStatus({ loading: false });
+            if (res.error) {
+              setStatus({ error: "Något gick fel", success: "", done: true });
+            } else {
+              setStatus({ error: "", success: "Produkt tillagd", done: true });
+              await timeOut(2000);
+              addOrUpdate();
+            }
+          } else {
+            res = await updateProduct({
+              id: props.product.id,
+              product_name: event.target.productName.value,
+              expiration_days: event.target.expirationDays.value,
+            });
+            setStatus({ loading: false });
+            if (res.error) {
+              setStatus({ error: "Något gick fel", success: "", done: true });
+            }
+            setStatus({ error: "", success: "Produkt uppdaterad", done: true });
+            await timeOut(2000);
+            addOrUpdate();
+          }
+        }}
+      >
+        <div class="flex flex-col items-start">
+          <label class="text-sm">Produkt</label>
+          <input
+            class="border border-gray-300 rounded-md p-2"
+            type="text"
+            name="productName"
+            value={props.product?.product_name || ""}
+            required
+          />
         </div>
-      </div>
-    </form>
+        <div class="flex flex-col items-start">
+          <label class="text-sm">Hållbarhet</label>
+          <input
+            class="border border-gray-300 rounded-md p-2"
+            type="number"
+            name="expirationDays"
+            value={props.product?.expiration_days}
+            required
+          />
+        </div>
+
+        <div class="mt-auto mb-8">
+          <div class="flex gap-x-2">
+            <Button variant="primary" type="submit" loading={status.loading}>
+              {props.product ? "Uppdatera produkt" : "Lägg till produkt"}
+            </Button>
+            {props.product && (
+              <Button
+                variant="danger"
+                type="button"
+                loading={status.loading}
+                onClick={deleteProduct}
+              >
+                ta bort produkt
+              </Button>
+            )}
+          </div>
+        </div>
+      </form>
+    </>
   );
 }
 export default AddProduct;
