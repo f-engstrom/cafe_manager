@@ -1,7 +1,5 @@
 import { A, useNavigate } from "@solidjs/router";
-import { session } from "../App";
 import { supabase } from "../lib/supabase";
-
 function Header() {
   const navigate = useNavigate();
 
