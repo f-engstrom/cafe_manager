@@ -9,6 +9,7 @@ interface Props {
   class?: string;
   variant?: "primary" | "secondary" | "danger";
   loading?: boolean;
+  displayWidth?: "full" | "auto";
 }
 
 function Button(props: Props) {
@@ -18,6 +19,7 @@ function Button(props: Props) {
     disabled,
     class: className,
     variant = "primary",
+    displayWidth = "full",
   } = props;
   return (
     <button
@@ -25,16 +27,17 @@ function Button(props: Props) {
       onClick={onClick}
       disabled={disabled}
       class={clsx(
-        "px-4 py-2 rounded-md text-white",
+        "px-4 py-2 rounded-md text-white text-center flex justify-center items-center",
         variant === "primary" && "bg-purple-500 hover:bg-purple-600",
         variant === "secondary" && "bg-gray-500 hover:bg-gray-600",
         variant === "danger" && "bg-red-500 hover:bg-red-600",
+        displayWidth === "full" && "w-full",
         className
       )}
     >
       {props.loading ? (
         <svg
-          class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+          class="animate-spin  h-6 w-6 text-white"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
