@@ -2,9 +2,9 @@ import ExpirationRow from "./ExpirationRow";
 import { For, createResource, createSignal } from "solid-js";
 import AddUpdateDeleteExpirationRow from "./AddExpirationRow";
 import Popover from "./Popover";
-import Button from "./Button";
 import { getFromExpiraton, getProducts } from "../lib/supabase";
 import Table from "./Table";
+import { sortAndGroup } from "../utils/helpers";
 
 function ProductExpirationView() {
   const [data, { mutate, refetch: refetchFromExpiration }] =
@@ -17,6 +17,8 @@ function ProductExpirationView() {
     setProduct(row);
     setAddRowPopoverOpeOpen(true);
   };
+
+  const sortedProducts = () => sortAndGroup(data());
 
   return (
     <>
@@ -38,9 +40,11 @@ function ProductExpirationView() {
           product={product()}
         />
       </Popover>
+
       <Table
         heading="Framtaget"
         buttonText="Lägg till ny rad"
+        loading={!sortedProducts()}
         onClick={() => {
           setAddRowPopoverOpeOpen(!addRowPopoverOpen());
         }}
@@ -53,19 +57,36 @@ function ProductExpirationView() {
           "Anteckning",
         ]}
         rows={
-          <For each={data()}>
+          <For each={sortedProducts()}>
             {(row) => {
               return (
-                <ExpirationRow
-                  onClick={() => {
-                    setProductAndOpen(row);
-                  }}
-                  id={row.id}
-                  expirationDate={row.exp_date}
-                  addedDate={row.start_date}
-                  name={row.products.product_name}
-                  note={row.note}
-                />
+                <>
+                  <tr class="border-t border-gray-200">
+                    <th
+                      colspan="6"
+                      scope="colgroup"
+                      class="bg-purple-700 py-2 pl-4 pr-3 text-left text-sm font-semibold text-white sm:pl-3"
+                    >
+                      {row.name}
+                    </th>
+                  </tr>
+                  <For each={row.products}>
+                    {(row) => {
+                      return (
+                        <ExpirationRow
+                          onClick={() => {
+                            setProductAndOpen(row);
+                          }}
+                          id={row.id}
+                          exp_date={row.exp_date}
+                          start_date={row.start_date}
+                          name={row?.products?.product_name}
+                          note={row.note}
+                        />
+                      );
+                    }}
+                  </For>
+                </>
               );
             }}
           </For>

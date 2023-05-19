@@ -38,6 +38,7 @@ function ProductAdminView() {
       </Popover>
       <Table
         heading="Produkter"
+        loading={!products()}
         buttonText="Lägg till ny produkt"
         onClick={() => {
           setAddRowPopoverOpeOpen(!addRowPopoverOpen());
