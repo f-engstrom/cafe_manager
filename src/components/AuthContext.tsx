@@ -1,4 +1,3 @@
-import { Session } from "@supabase/supabase-js";
 import {
   JSXElement,
   createContext,
@@ -6,7 +5,7 @@ import {
   createSignal,
   useContext,
 } from "solid-js";
-import { SetStoreFunction, createStore } from "solid-js/store";
+import { SetStoreFunction } from "solid-js/store";
 import { supabase } from "../lib/supabase";
 
 export const AuthContext = createContext([{ session: undefined }, {}]);
