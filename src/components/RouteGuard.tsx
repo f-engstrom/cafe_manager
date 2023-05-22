@@ -15,10 +15,10 @@ export default function RouteGuard() {
 
   return (
     <>
-      <main class="grid grid-cols-12 bg-white">
+      <main class="bg-white">
         {" "}
         <SideBar />
-        <div class=" flex grow flex-col p-6 col-span-10 col-start-3">
+        <div class="ml-36 flex flex-col">
           <Outlet />
         </div>
       </main>

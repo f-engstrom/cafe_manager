@@ -6,7 +6,7 @@ function SideBar() {
   const navigate = useNavigate();
   const [session] = useAuth();
   return (
-    <div class="min-h-screen flex fixed col-span-2">
+    <div class="flex min-h-screen fixed">
       <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-gradient-to-b from-purple-400 to-purple-600 px-6">
         <div class="flex h-16 shrink-0 items-center">
           {/* <img class="h-8 w-auto" src="https://tailwindui.com/img/logos/mark.svg?color=white" alt="Your Company"> */}
@@ -67,31 +67,26 @@ function SideBar() {
               </ul>
             </li>
             ,
-            <li class="-mx-6 mt-auto">
-              <a
-                href="#"
-                class="flex items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6 text-white hover:bg-purple-700"
-              >
-                <img
+            <li class="-mx-6 mt-auto mb-4">
+              <div class="flex flex-col items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6 text-white hover:bg-purple-700">
+                {/* <img
                   class="h-8 w-8 rounded-full bg-purple-700"
                   src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
                   alt=""
-                />
+                /> */}
                 <span class="sr-only">Your profile</span>
                 <span aria-hidden="true">{session()?.user?.email}</span>
-              </a>
-            </li>
-            <li class="-mx-6">
-              <button
-                class=""
-                name="signOut"
-                onClick={() => {
-                  supabase.auth.signOut();
-                  navigate("/signin", { replace: true });
-                }}
-              >
-                logga ut
-              </button>
+                <button
+                  class=""
+                  name="signOut"
+                  onClick={() => {
+                    supabase.auth.signOut();
+                    navigate("/signin", { replace: true });
+                  }}
+                >
+                  logga ut
+                </button>
+              </div>
             </li>
           </ul>
         </nav>
