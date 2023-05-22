@@ -12,18 +12,26 @@ function Popover(props: Props) {
   const { heading, onClose } = props;
 
   return (
-    <div class={clsx(!props.open && "hidden")}>
+    <div>
       <div
-        class="fixed top-0 left-0 right-0 bottom-0 backdrop-blur-sm"
+        class={clsx(
+          !props.open && "hidden",
+          "fixed bottom-0 left-0 right-0 top-0 backdrop-blur-sm"
+        )}
         onClick={onClose}
       ></div>
-      <div class="px-4 lg:px-6 bottom-0 left-0 right-0 md:left-auto h-5/6 max-h-[80%] md:top-0 md:h-full md:max-h-full md:max-h-full md:w-[27rem] fixed bg-white shadow-topBottom z-[999] flex flex-col">
-        <div class="lg:px-6 -mx-4 my-0 flex min-h-[3.5rem] items-center border-b px-4 md:min-h-[4rem] lg:-mx-6">
-          <h2 class="font-standard text-lg font-bold text-greyDarker break-words">
+      <div
+        class={clsx(
+          props.open ? "translate-x-0" : "translate-x-full",
+          "shadow-topBottom fixed bottom-0 left-0 right-0 z-[999] flex h-5/6 max-h-[80%] transform flex-col bg-white px-4 transition duration-500 ease-in-out md:left-auto md:top-0 md:h-full md:max-h-full md:w-[27rem] lg:px-6"
+        )}
+      >
+        <div class="-mx-4 my-0 flex min-h-[3.5rem] items-center border-b px-4 md:min-h-[4rem] lg:-mx-6 lg:px-6">
+          <h2 class="font-standard text-greyDarker break-words text-lg font-bold">
             {heading}
           </h2>
           <button
-            class="-mr-4 ml-auto inline-flex items-center rounded-full hover:bg-greyLighter"
+            class="hover:bg-greyLighter -mr-4 ml-auto inline-flex items-center rounded-full"
             type="button"
             onClick={onClose}
           >
@@ -34,7 +42,7 @@ function Popover(props: Props) {
                 width="24"
                 height="24"
                 viewBox="0 0 24 24"
-                class="align-top fill-current transform inline-block w-6 h-6 rotate-0"
+                class="inline-block h-6 w-6 rotate-0 transform fill-current align-top"
                 aria-hidden="true"
               >
                 <path
