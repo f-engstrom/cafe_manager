@@ -14,9 +14,9 @@ interface Props {
 export default function Table(props: Props) {
   const { onClick, heading, buttonText, tableHeadings } = props;
   return (
-    <div class="mt-8 flex flex-col mx-10 bg-white max-h-screen">
-      <div class="flex justify-between mb-6  bg-white">
-        <h2 class=" text-2xl bold">{heading}</h2>
+    <div class="mx-10 mt-8 flex max-h-screen flex-col bg-white">
+      <div class="mb-6 flex justify-between  bg-white">
+        <h2 class=" bold text-2xl">{heading}</h2>
         <Button variant="primary" displayWidth="auto" onClick={onClick}>
           {buttonText}
         </Button>
@@ -27,11 +27,11 @@ export default function Table(props: Props) {
       >
         <table class="table-auto ">
           <thead>
-            <tr class="sticky z-10 top-15 bg-white">
+            <tr class="top-15 sticky z-10 bg-white">
               <For each={tableHeadings}>
                 {(heading) => {
                   return (
-                    <th class="py-3.5 pl-4 pr-3  text-sm font-semibold text-gray-900 sm:pl-3">
+                    <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-3">
                       {heading}
                     </th>
                   );
