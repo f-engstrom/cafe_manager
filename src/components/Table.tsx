@@ -27,7 +27,7 @@ export default function Table(props: Props) {
       >
         <table class="table-auto ">
           <thead>
-            <tr class="top-15 sticky z-10 bg-white">
+            <tr class="bg-white">
               <For each={tableHeadings}>
                 {(heading) => {
                   return (
