@@ -27,14 +27,16 @@ function ProductAdminView() {
           setProduct(null);
         }}
       >
-        <AddProduct
-          onAddOrUpdate={() => {
-            refetchProducts();
-            setAddRowPopoverOpeOpen(false);
-            setProduct(null);
-          }}
-          product={product()}
-        />
+        {addRowPopoverOpen() && (
+          <AddProduct
+            onAddOrUpdate={() => {
+              refetchProducts();
+              setAddRowPopoverOpeOpen(false);
+              setProduct(null);
+            }}
+            product={product()}
+          />
+        )}
       </Popover>
       <Table
         heading="Produkter"

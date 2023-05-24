@@ -30,15 +30,17 @@ function ProductExpirationView() {
           setProduct(null);
         }}
       >
-        <AddUpdateDeleteExpirationRow
-          onAddOrUpdate={() => {
-            refetchFromExpiration();
-            setAddRowPopoverOpeOpen(false);
-            setProduct(null);
-          }}
-          products={products()}
-          product={product()}
-        />
+        {addRowPopoverOpen() && (
+          <AddUpdateDeleteExpirationRow
+            onAddOrUpdate={() => {
+              refetchFromExpiration();
+              setAddRowPopoverOpeOpen(false);
+              setProduct(null);
+            }}
+            products={products()}
+            product={product()}
+          />
+        )}
       </Popover>
 
       <Table
