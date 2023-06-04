@@ -6,8 +6,8 @@ export const formatDate = (date: number) => {
 
   return `${day} ${month} ${year}`;
 };
-export const setFutureDate = (date: string, days: number) => {
-  if (date === "") return "2018-07-19";
+export const setFutureDate = (date: string, days: number = 0) => {
+  if (!date) return "";
   const dateObj = new Date(Date.parse(date));
   dateObj.setDate(dateObj.getDate() + days);
   return dateObj.toISOString().split("T")[0];
