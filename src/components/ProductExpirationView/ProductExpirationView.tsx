@@ -1,10 +1,10 @@
-import ExpirationRow from "./ExpirationRow";
+import ExpirationRow from "../ExpirationRow";
 import { For, createResource, createSignal } from "solid-js";
 import AddUpdateDeleteExpirationRow from "./AddExpirationRow";
-import Popover from "./Popover";
-import { getFromExpiraton, getProducts } from "../lib/supabase";
-import Table from "./Table";
-import { sortAndGroup } from "../utils/helpers";
+import Popover from "../Popover";
+import { getFromExpiraton, getProducts } from "../../lib/supabase";
+import Table from "../Table";
+import { sortAndGroup } from "../../utils/helpers";
 
 function ProductExpirationView() {
   const [data, { mutate, refetch: refetchFromExpiration }] =

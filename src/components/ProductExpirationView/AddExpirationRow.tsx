@@ -1,44 +1,21 @@
 //add row component
 
-import { For, createSignal, onCleanup } from "solid-js";
-import { setFutureDate, timeOut } from "../utils/helpers";
+import { For, createSignal } from "solid-js";
+import { setFutureDate, timeOut } from "../../utils/helpers";
 import { createStore } from "solid-js/store";
-import { FormFields } from "../models/models";
-import Button from "./Button";
+import { FormFields, Product, ProductRow } from "../../models/models";
+import Button from "../Button";
 import {
   addToExpiration,
   requestDeleteFromExpiraton,
   updateExpiration,
-} from "../lib/supabase";
-import Alert from "./Alert";
+} from "../../lib/supabase";
+import Alert from "../Alert";
 
 interface Props {
   onAddOrUpdate: () => void;
-  products:
-    | {
-        created_at: string | null;
-        expiration_days: number | null;
-        id: number;
-        product_name: string | null;
-      }[]
-    | null
-    | undefined;
-  product: {
-    created_at: string | null;
-    exp_date: string | null;
-    id: number;
-    note: string | null;
-    product: number | null;
-    start_date: string | null;
-    products:
-      | {
-          product_name: string | null;
-        }
-      | {
-          product_name: string | null;
-        }[]
-      | null;
-  };
+  products: Product[] | undefined;
+  product: ProductRow;
 }
 function AddUpdateDeleteExpirationRow(props: Props) {
   const { onAddOrUpdate } = props;
@@ -47,11 +24,13 @@ function AddUpdateDeleteExpirationRow(props: Props) {
     setStatus({ error: "", success: "", done: false });
   };
   const [form, setForm] = createStore<FormFields>({
-    id: 0,
-    addedDate: "",
-    expirationDate: "",
+    startDate: props.product?.start_date,
+    expirationDate: props.product?.exp_date,
+    selectedProduct: props.products?.find(
+      (product) => product.id === props.product?.product
+    ),
   });
-  const [selectedProduct, setSelectedProduct] = createSignal();
+
   const [status, setStatus] = createStore({
     error: "",
     success: "",
@@ -60,21 +39,33 @@ function AddUpdateDeleteExpirationRow(props: Props) {
     loadingDelete: false,
   });
   const updateFormField = (fieldName: string) => (event: Event) => {
+    console.log("plonk", fieldName);
+
     const inputElement = event.currentTarget as HTMLInputElement;
-    console.log(fieldName, inputElement.value);
-    if (fieldName === "id") {
+    if (fieldName === "startDate") {
       setForm({
-        [fieldName]: parseInt(inputElement.value),
+        startDate: inputElement.value,
+        expirationDate: setFutureDate(
+          inputElement.value,
+          form.selectedProduct?.expiration_days
+        ),
       });
-      return;
     }
-    setForm({
-      [fieldName]: inputElement.value,
-    });
+    if (fieldName === "selectedProduct") {
+      const selectedProduct = props.products?.find(
+        (product) => product.id === parseInt(inputElement.value, 10)
+      );
+
+      setForm({
+        selectedProduct: selectedProduct,
+        expirationDate: setFutureDate(
+          form.startDate,
+          selectedProduct?.expiration_days
+        ),
+      });
+    }
   };
-  onCleanup(() => {
-    console.log("unmount");
-  });
+
   const deleteFromExpiration = async () => {
     setStatus({ loadingDelete: true });
     const res = await requestDeleteFromExpiraton(props.product.id);
@@ -95,7 +86,6 @@ function AddUpdateDeleteExpirationRow(props: Props) {
       addOrUpdate();
     }
   };
-
   return (
     <>
       {status.done && !status.error && (
@@ -115,7 +105,7 @@ function AddUpdateDeleteExpirationRow(props: Props) {
         />
       )}
       <form
-        class="flex flex-col h-full gap-4 mt-4"
+        class="mt-4 flex h-full flex-col gap-4"
         onSubmit={async (event: Event) => {
           event.preventDefault();
           setStatus({ loadingAdd: true });
@@ -124,7 +114,7 @@ function AddUpdateDeleteExpirationRow(props: Props) {
             res = await addToExpiration({
               product: event.target.product.value,
               exp_date: event.target.expirationDate.value,
-              start_date: event.target.addedDate.value,
+              start_date: event.target.startDate.value,
               note: event.target.note.value,
             });
             setStatus({ loadingAdd: false });
@@ -148,7 +138,7 @@ function AddUpdateDeleteExpirationRow(props: Props) {
               id: props.product.id,
               product: event.target.product.value,
               exp_date: event.target.expirationDate.value,
-              start_date: event.target.addedDate.value,
+              start_date: event.target.startDate.value,
               note: event.target.note.value,
             });
             setStatus({ loadingAdd: false });
@@ -172,7 +162,7 @@ function AddUpdateDeleteExpirationRow(props: Props) {
       >
         <div class="flex flex-col items-start">
           <label
-            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+            class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
             for="product"
           >
             Produkt:
@@ -181,14 +171,9 @@ function AddUpdateDeleteExpirationRow(props: Props) {
             name="product"
             id="product"
             required
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-            onChange={(e) => {
-              setSelectedProduct(
-                props.products.find(
-                  (product) => product.id === parseInt(e.currentTarget.value)
-                )
-              );
-            }}
+            class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+            onChange={updateFormField("selectedProduct")}
+            disabled={props.product ? true : false}
             value={props.product?.product}
           >
             <option value="0">Välj produkt</option>
@@ -207,11 +192,12 @@ function AddUpdateDeleteExpirationRow(props: Props) {
             <input
               type="date"
               id="start"
-              name="addedDate"
+              name="startDate"
               required
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              onChange={updateFormField("addedDate")}
-              value={props.product?.start_date}
+              disabled={form?.selectedProduct ? false : true}
+              class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+              onChange={updateFormField("startDate")}
+              value={form.startDate}
             />
           </div>
           <div class="flex flex-col items-start">
@@ -222,12 +208,10 @@ function AddUpdateDeleteExpirationRow(props: Props) {
               type="date"
               id="end"
               required
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 pl-10 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
               name="expirationDate"
-              value={setFutureDate(
-                form.addedDate,
-                selectedProduct()?.expiration_days
-              )}
+              value={form.expirationDate}
+              disabled
               onChange={updateFormField("expirationDate")}
             />
           </div>
@@ -243,12 +227,12 @@ function AddUpdateDeleteExpirationRow(props: Props) {
             id="note"
             name="note"
             rows="4"
-            class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
             value={props.product?.note ? props.product.note : ""}
           ></textarea>
         </div>
-        <div class="mt-auto mb-8 ">
-          <div class="flex gap-x-2 justify-center">
+        <div class="mb-8 mt-auto ">
+          <div class="flex justify-center gap-x-2">
             <Button variant="primary" type="submit" loading={status.loadingAdd}>
               {props.product ? "Uppdatera produkt" : "Lägg till produkt"}
             </Button>
@@ -259,7 +243,7 @@ function AddUpdateDeleteExpirationRow(props: Props) {
                 loading={status.loadingDelete}
                 onClick={deleteFromExpiration}
               >
-                ta bort produkt
+                Ta bort produkt
               </Button>
             )}
           </div>
