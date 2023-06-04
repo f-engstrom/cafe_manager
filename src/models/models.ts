@@ -15,10 +15,11 @@ export interface UpdatedProduct {
 }
 export interface FormFields {
   id: number;
-  addedDate: string;
+  startDate: string;
   expirationDate: string;
 }
 
 type ProductExpirationRow =
   Database["public"]["Tables"]["product_expiration"]["Row"];
 export interface ProductRow extends ProductExpirationRow {}
+export type Product = Database["public"]["Tables"]["products"]["Row"];
